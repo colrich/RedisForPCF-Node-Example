@@ -1,0 +1,26 @@
+{
+  "name": "RedisForPCF-Node-Example",
+  "version": "1.0.0",
+  "description": "Sample Node.js Redis example",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "express": "^4.13.3",
+    "redis": "2.8.0"
+  },
+  "engines": {
+    "node": "8.1.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/colrich/RedisForPCF-Node-Example"
+  },
+  "keywords": [
+    "node",
+    "heroku",
+    "express"
+  ],
+  "license": "MIT"
+}
