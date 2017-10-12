@@ -12,9 +12,24 @@ function getVcapServices() {
 
     var vcap = JSON.parse(vcstr);
     if (vcap != null) {
-      console.log("found redis instance: " + vcap["p.redis"][0].name);
-      return vcap["p.redis"][0]
+      if (vcap.hasOwnProperty("p.redis")) {
+        console.log("found redis instance: " + vcap["p.redis"][0].name);
+        return vcap["p.redis"][0]
+      }
+      else if (vcap.hasOwnProperty("p-redis")) {
+        console.log("found redis instance: " + vcap["p-redis"][0].name);
+        return vcap["p-redis"][0]
+      }
+      else {
+        console.log("ERROR: no redis service bound!")
+      }
     }
+    else {
+      console.log("ERROR: no redis service bound!")
+    }
+  }
+  else {
+    console.log("ERROR: VCAP_SERVICES does not contain a redis block")
   }
   return null
 }
@@ -38,25 +53,16 @@ app.set('port', (process.env.PORT || 8080))
 // host / port / password info to the response
 app.get('/', function(request, response) {
   console.log("Getting Redis connection info from the environment...")
-  var vcstr = process.env.VCAP_SERVICES;
-  if (vcstr != null && vcstr.length > 0 && vcstr != '{}') {
-    console.log("found VCAP_SERVICES: " + vcstr)
 
-    var vcap = JSON.parse(vcstr);
-    if (vcap != null) {
-      console.log("found redis instance: " + vcap["p.redis"][0].name);
-      var info = getRedisInfo(vcap["p.redis"][0])
-      console.log("connection info: " + info.host + " / " + info.port + " / " + info.password)
-      response.send("connection info: " + info.host + " / " + info.port + " / " + info.password)
-    }
-    else {
-      console.log("ERROR: no redis service bound!")
-      response.send("ERROR: no redis service bound!")
-    }
+  var vcap = getVcapServices()
+  if (vcap != null) {
+    var info = getRedisInfo(vcap)
+    console.log("connection info: " + info.host + " / " + info.port + " / " + info.password)
+    response.send("connection info: " + info.host + " / " + info.port + " / " + info.password)
   }
-  else { 
-    console.log("ERROR: VCAP_SERVICES does not contain a redis block")
-    response.send("ERROR: VCAP_SERVICES does not contain a redis block")
+  else {
+    console.log("ERROR: VCAP_SERVICES does not contain a redis block or no redis bound")
+    response.send("ERROR: VCAP_SERVICES does not contain a redis block or no redis bound")
   }
 })
 
@@ -104,6 +110,8 @@ app.get('/get', function(request, response) {
   }
 })
 
+
+// start listening for connections
 app.listen(app.get('port'), function() {
   console.log("Node app is running on port:" + app.get('port'))
 })
